@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        '16': 'repeat(16, minmax(0, 1fr))',
+        '32': 'repeat(32, minmax(0, 1fr))',
+      },
       colors: {
         radar: {
           bg: "#0B0F19",
@@ -16,8 +20,8 @@ export default {
           amber: "#F59E0B",
           red: "#EF4444",
           purple: "#8B5CF6",
-        }
-      }
+        },
+      },
     },
   },
   plugins: [],

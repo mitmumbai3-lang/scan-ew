@@ -47,14 +47,25 @@ class SimulationSession:
         self.last_info = None
         self.stream_task: Optional[asyncio.Task] = None
 
-    def initialize(self, scenario_id: str, scheduler_id: str, seed: int, num_bands: int = 16):
+    def initialize(
+        self,
+        scenario_id: str,
+        scheduler_id: str,
+        seed: int,
+        num_bands: int = 16,
+        custom_env: Optional[RFEnvironment] = None,
+    ):
         self.scenario_id = scenario_id
         self.scheduler_id = scheduler_id
         self.seed = seed
         self.num_bands = num_bands
         self.is_running = False
 
-        self.env = get_scenario_preset(scenario_id, num_bands=num_bands, seed=seed)
+        if custom_env is not None:
+            self.env = custom_env
+        else:
+            self.env = get_scenario_preset(scenario_id, num_bands=num_bands, seed=seed)
+
         self.scheduler = get_scheduler(scheduler_id, num_bands=num_bands, seed=seed)
         self.telemetry_history = []
 
@@ -70,6 +81,10 @@ class SimulationSession:
             self.initialize(self.scenario_id, self.scheduler_id, self.seed, self.num_bands)
 
         step_idx = self.env.current_step
+        if step_idx >= self.env.config.max_steps_per_episode:
+            self.env.reset(seed=self.seed)
+            step_idx = 0
+
         action = self.scheduler.select_band(step_idx)
         obs, telem, info = self.env.step(action)
         self.scheduler.observe(obs)
@@ -195,9 +210,9 @@ def step_simulation(req: SimStepRequest):
             sim_session.is_running = False
             break
 
-    # Return latest step data
+    # Return latest step data and batch steps
     latest = results[-1] if results else {}
-    return {"status": "stepped", "step_count": len(results), "latest": latest}
+    return {"status": "stepped", "step_count": len(results), "latest": latest, "all_steps": results}
 
 
 @router.post("/reset")

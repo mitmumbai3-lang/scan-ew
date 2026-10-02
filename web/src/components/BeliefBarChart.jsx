@@ -19,7 +19,10 @@ export default function BeliefBarChart({ beliefs = [], components = {}, currentB
       </div>
 
       {/* Per-band Bar Grid */}
-      <div className="grid grid-cols-16 gap-1 h-36 items-end pt-4 pb-2 border-b border-gray-800/80 bg-gray-950/40 rounded px-2">
+      <div
+        className="grid gap-1 h-36 items-end pt-4 pb-2 border-b border-gray-800/80 bg-gray-950/40 rounded px-2 overflow-hidden"
+        style={{ gridTemplateColumns: `repeat(${numBands}, minmax(0, 1fr))` }}
+      >
         {Array.from({ length: numBands }).map((_, b) => {
           const beliefVal = displayBeliefs[b] !== undefined ? displayBeliefs[b] : 0.5;
           const comp = components[b] || {};

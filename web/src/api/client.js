@@ -1,8 +1,9 @@
 /**
  * API client and WebSocket service for EW Smart Scan backend.
  */
-const API_BASE = "http://localhost:8000";
-const WS_BASE = "ws://localhost:8000";
+const host = typeof window !== "undefined" && window.location.hostname ? window.location.hostname : "127.0.0.1";
+const API_BASE = `http://${host}:8000`;
+const WS_BASE = `ws://${host}:8000`;
 
 export async function fetchPresets() {
   const res = await fetch(`${API_BASE}/api/sim/presets`);
@@ -88,17 +89,56 @@ export async function uploadDataset(file) {
 }
 
 export function connectLiveWebSocket(onMessage, onOpen, onClose) {
-  const ws = new WebSocket(`${WS_BASE}/ws/live`);
-  ws.onopen = () => onOpen && onOpen();
-  ws.onmessage = (event) => {
+  let ws = null;
+  let isClosedExplicitly = false;
+  let reconnectTimer = null;
+
+  function connect() {
+    if (isClosedExplicitly) return;
     try {
-      const data = JSON.parse(event.data);
-      onMessage && onMessage(data);
+      ws = new WebSocket(`${WS_BASE}/ws/live`);
+      ws.onopen = () => {
+        onOpen && onOpen();
+      };
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          onMessage && onMessage(data);
+        } catch (err) {
+          console.error("WS Parse error", err);
+        }
+      };
+      ws.onclose = () => {
+        onClose && onClose();
+        if (!isClosedExplicitly) {
+          clearTimeout(reconnectTimer);
+          reconnectTimer = setTimeout(connect, 2000);
+        }
+      };
+      ws.onerror = () => {
+        try {
+          if (ws) ws.close();
+        } catch (e) {}
+      };
     } catch (err) {
-      console.error("WS Parse error", err);
+      if (!isClosedExplicitly) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connect, 2000);
+      }
     }
+  }
+
+  connect();
+
+  return {
+    close: () => {
+      isClosedExplicitly = true;
+      clearTimeout(reconnectTimer);
+      if (ws) {
+        try {
+          ws.close();
+        } catch (e) {}
+      }
+    },
   };
-  ws.onclose = () => onClose && onClose();
-  ws.onerror = (err) => console.error("WS Error", err);
-  return ws;
 }

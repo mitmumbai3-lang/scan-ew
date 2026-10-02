@@ -44,8 +44,8 @@ export default function ExplainabilityPage({ explainability = {}, currentBand = 
             <span>2. Online Periodicity & Main-Beam Pre-Positioning</span>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Extracts the fundamental antenna scan period $\hat{T}_{scan}$ and phase from pulse time-of-arrival (TOA) intervals.
-            Injects an exponential boost $\Gamma_{pred}$ when $t \in [t_{exp} - 1, t_{exp} + 1]$, meeting rotating radars exactly as they illuminate the receiver.
+            Extracts the fundamental antenna scan period T_scan and phase from pulse time-of-arrival (TOA) intervals.
+            Injects an exponential boost &Gamma; when current step falls within [t_expected - 1, t_expected + 1], meeting rotating radars exactly as they illuminate the receiver.
           </p>
           <div className="bg-gray-950 p-2.5 rounded font-mono text-[11px] text-purple-300 mt-3 border border-gray-800">
             Γ_pred(b, t) = 2.5 * Confidence * exp(-0.5 * (t - t_exp)²)

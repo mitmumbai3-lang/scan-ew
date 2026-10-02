@@ -157,7 +157,10 @@ export default function WaterfallCanvas({
       </div>
 
       {/* Frequency Column Headers */}
-      <div className="grid grid-cols-16 gap-0 text-center text-[10px] font-mono text-slate-400 mb-1 border-b border-gray-800 pb-1">
+      <div
+        className="grid gap-0 text-center text-[10px] font-mono text-slate-400 mb-1 border-b border-gray-800 pb-1"
+        style={{ gridTemplateColumns: `repeat(${numBands}, minmax(0, 1fr))` }}
+      >
         {Array.from({ length: numBands }).map((_, b) => {
           const centerFreq = (freqMinGhz + (b + 0.5) * bandStepGhz).toFixed(1);
           return (

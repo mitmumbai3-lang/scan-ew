@@ -17,6 +17,36 @@ import {
   connectLiveWebSocket,
 } from "./api/client";
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bg-rose-950/40 border border-rose-600/50 rounded-xl p-6 text-rose-200 m-4 shadow-xl">
+          <h3 className="font-bold text-base mb-2">Panel Render Notice</h3>
+          <p className="text-xs font-mono text-rose-300">{String(this.state.error?.message || this.state.error)}</p>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            className="mt-4 px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded text-xs font-bold transition"
+          >
+            Retry Panel
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("live");
   const [isConnected, setIsConnected] = useState(false);
@@ -125,8 +155,9 @@ export default function App() {
       setMetrics(d.metrics || {});
       setExplainability(d.explainability || {});
       setHistory((prev) => {
-        const updated = [...prev, d];
-        return updated.length > 70 ? updated.slice(-70) : updated;
+        const toAdd = res.all_steps && res.all_steps.length > 0 ? res.all_steps : [d];
+        const updated = [...prev, ...toAdd];
+        return updated.length > 80 ? updated.slice(-80) : updated;
       });
     }
   }
@@ -195,68 +226,70 @@ export default function App() {
         />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          {activeTab === "live" && (
-            <LiveScanPage
-              history={history}
-              latestStepData={latestStepData}
-              currentBand={currentBand}
-              beliefs={beliefs}
-              metrics={metrics}
-              explainability={explainability}
-              numBands={numBands}
-              isRunning={isRunning}
-              onPlay={handlePlay}
-              onPause={handlePause}
-              onStep={handleStep}
-              onReset={handleReset}
-              speedHz={speedHz}
-              onSpeedChange={(hz) => {
-                setSpeedHz(hz);
-                if (isRunning) playSim(hz);
-              }}
-              presets={presets}
-              selectedScenario={selectedScenario}
-              onScenarioChange={handleScenarioChange}
-              schedulers={schedulers}
-              selectedScheduler={selectedScheduler}
-              onSchedulerChange={handleSchedulerChange}
-              showGroundTruth={showGroundTruth}
-              setShowGroundTruth={setShowGroundTruth}
-            />
-          )}
+          <ErrorBoundary key={activeTab}>
+            {activeTab === "live" && (
+              <LiveScanPage
+                history={history}
+                latestStepData={latestStepData}
+                currentBand={currentBand}
+                beliefs={beliefs}
+                metrics={metrics}
+                explainability={explainability}
+                numBands={numBands}
+                isRunning={isRunning}
+                onPlay={handlePlay}
+                onPause={handlePause}
+                onStep={handleStep}
+                onReset={handleReset}
+                speedHz={speedHz}
+                onSpeedChange={(hz) => {
+                  setSpeedHz(hz);
+                  if (isRunning) playSim(hz);
+                }}
+                presets={presets}
+                selectedScenario={selectedScenario}
+                onScenarioChange={handleScenarioChange}
+                schedulers={schedulers}
+                selectedScheduler={selectedScheduler}
+                onSchedulerChange={handleSchedulerChange}
+                showGroundTruth={showGroundTruth}
+                setShowGroundTruth={setShowGroundTruth}
+              />
+            )}
 
-          {activeTab === "scenarios" && (
-            <ScenarioLabPage
-              presets={presets}
-              selectedScenario={selectedScenario}
-              onScenarioChange={handleScenarioChange}
-              emitters={emitters}
-            />
-          )}
+            {activeTab === "scenarios" && (
+              <ScenarioLabPage
+                presets={presets}
+                selectedScenario={selectedScenario}
+                onScenarioChange={handleScenarioChange}
+                emitters={emitters}
+              />
+            )}
 
-          {activeTab === "benchmark" && <BenchmarkPage presets={presets} />}
+            {activeTab === "benchmark" && <BenchmarkPage presets={presets} />}
 
-          {activeTab === "explain" && (
-            <ExplainabilityPage
-              explainability={explainability}
-              currentBand={currentBand}
-              numBands={numBands}
-            />
-          )}
+            {activeTab === "explain" && (
+              <ExplainabilityPage
+                explainability={explainability}
+                currentBand={currentBand}
+                numBands={numBands}
+              />
+            )}
 
-          {activeTab === "dataset" && (
-            <DatasetPage
-              onDatasetLoaded={async () => {
-                const s = await fetchState();
-                if (s) {
-                  setEmitters(s.emitters || []);
-                  setSelectedScenario(s.scenario_id);
-                  setNumBands(s.num_bands);
-                  setHistory([]);
-                }
-              }}
-            />
-          )}
+            {activeTab === "dataset" && (
+              <DatasetPage
+                onDatasetLoaded={async () => {
+                  const s = await fetchState();
+                  if (s) {
+                    setEmitters(s.emitters || []);
+                    setSelectedScenario(s.scenario_id);
+                    setNumBands(s.num_bands);
+                    setHistory([]);
+                  }
+                }}
+              />
+            )}
+          </ErrorBoundary>
         </main>
       </div>
 

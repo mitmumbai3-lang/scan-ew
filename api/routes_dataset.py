@@ -41,16 +41,13 @@ async def upload_dataset(file: UploadFile = File(...)):
             env = DatasetAdapter.load_from_csv(text)
 
         # Inject into simulation session as a custom scenario
-        sim_session.env = env
-        sim_session.scenario_id = f"custom_{filename}"
-        sim_session.num_bands = env.config.num_bands
         sim_session.initialize(
-            scenario_id="custom",
+            scenario_id=f"custom_{filename}",
             scheduler_id=sim_session.scheduler_id,
             seed=42,
             num_bands=env.config.num_bands,
+            custom_env=env,
         )
-        sim_session.env = env  # preserve custom loaded environment
 
         return {
             "status": "success",
