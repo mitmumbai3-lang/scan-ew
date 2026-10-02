@@ -1,0 +1,55 @@
+{
+  "config": {
+    "num_bands": 16,
+    "freq_min_ghz": 0.5,
+    "freq_max_ghz": 18.0,
+    "dwell_time_ms": 2.0,
+    "max_steps_per_episode": 300
+  },
+  "seed": 101,
+  "emitters": [
+    {
+      "id": "ROT_RADAR_01",
+      "name": "Surveillance Radar Alpha",
+      "emitter_type": "periodic",
+      "band": 2,
+      "scan_period": 24,
+      "beam_width": 2,
+      "phase_offset": 4,
+      "base_snr_db": 22.0,
+      "priority": 1,
+      "start_step": 0
+    },
+    {
+      "id": "HOPPER_01",
+      "name": "Tactical Hopper Echo",
+      "emitter_type": "agile",
+      "hop_bands": [4, 7, 11, 15],
+      "dwell_per_hop": 2,
+      "hop_mode": "pseudorandom",
+      "base_snr_db": 19.0,
+      "priority": 1,
+      "start_step": 10
+    },
+    {
+      "id": "DECOY_SAT_01",
+      "name": "Saturation Decoy Echo",
+      "emitter_type": "decoy",
+      "band": 6,
+      "duty_cycle": 0.98,
+      "base_snr_db": 25.0,
+      "priority": 3,
+      "start_step": 0
+    },
+    {
+      "id": "FIXED_BEACON",
+      "name": "Fixed Anchor Beacon",
+      "emitter_type": "fixed",
+      "band": 13,
+      "duty_cycle": 0.8,
+      "base_snr_db": 15.0,
+      "priority": 2,
+      "start_step": 0
+    }
+  ]
+}

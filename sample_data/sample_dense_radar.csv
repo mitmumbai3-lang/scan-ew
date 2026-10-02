@@ -1,0 +1,6 @@
+id,name,emitter_type,band,duty_cycle,scan_period,beam_width,phase_offset,hop_bands,dwell_per_hop,base_snr_db,priority,start_step,stop_step
+RAD_ALPHA,Alpha 3D Radar,periodic,3,0,18,2,0,,1,22.0,1,0,
+RAD_BRAVO,Bravo Search Radar,periodic,8,0,28,2,5,,1,21.0,1,0,
+COMM_DELTA,Delta Tactical Link,fixed,5,0.85,,,,,,16.0,2,10,
+JAMMER_X,Broadband Decoy 1,decoy,12,0.96,,,,,,24.0,3,0,
+AGILE_Z,Agile Hopper Fast,agile,,,,,,1;4;9;14,2,18.5,1,20,
